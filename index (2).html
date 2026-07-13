@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Varanda — sua rede social</title>
+<style>
+  :root{
+    --tinta: #1f2b1e;
+    --pergaminho: #f4efe1;
+    --musgo: #4c6b4a;
+    --musgo-escuro: #35502f;
+    --barro: #b5652f;
+    --barro-claro: #e0a878;
+    --linha: #d8cfb4;
+    --branco-cartao: #fffdf7;
+    --erro: #a63f34;
+    --sombra: 0 6px 18px rgba(31,43,30,0.12);
+    --radius: 14px;
+    --fonte-titulo: 'Varanda-Serif', Georgia, 'Times New Roman', serif;
+    --fonte-corpo: 'Varanda-Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    min-height:100vh;
+    background: var(--pergaminho);
+    color: var(--tinta);
+    font-family: var(--fonte-corpo);
+  }
+
+  body{
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(76,107,74,0.06), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(181,101,47,0.07), transparent 45%);
+  }
+
+  h1,h2,h3, .brand-word{
+    font-family: var(--fonte-titulo);
+    letter-spacing: 0.2px;
+  }
+
+  ::selection{ background: var(--barro-claro); color: var(--tinta); }
+
+  button { font-family: var(--fonte-corpo); cursor: pointer; }
+
+  a { color: var(--musgo-escuro); }
+
+  /* ---------- FOCO DE TECLADO ---------- */
+  button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--barro);
+    outline-offset: 2px;
+  }
+
+  /* ---------- LAYOUT GERAL ---------- */
+  #app { min-height:100vh; }
+
+  .hidden { display:none !important; }
+
+  /* ---------- TELA DE ENTRADA (LOGIN/CADASTRO) ---------- */
+  .tela-auth{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 20px;
+  }
+
+  .cartao-auth{
+    width:100%;
+    max-width: 920px;
+    background: var(--branco-cartao);
+    border-radius: 20px;
+    box-shadow: var(--sombra);
+    display:grid;
+    grid-template-columns: 1.05fr 1fr;
+    overflow:hidden;
+    border: 1px solid var(--linha);
+  }
+
+  .lado-poster{
+    background:
+      linear-gradient(165deg, var(--musgo) 0%, var(--musgo-escuro) 100%);
+    color: var(--pergaminho);
+    padding: 48px 40px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .lado-poster::after{
+    content:"";
+    position:absolute;
+    right:-60px; bottom:-60px;
+    width:220px; height:220px;
+    border-radius:50%;
+    background: rgba(181,101,47,0.35);
+    filter: blur(2px);
+  }
+
+  .lado-poster .marca{
+    font-size: 2.1rem;
+    font-weight:700;
+    margin:0 0 6px 0;
+    z-index:1;
+  }
+
+  .lado-poster .slogan{
+    font-size:0.98rem;
+    opacity:0.88;
+    margin: 0 0 auto 0;
+    z-index:1;
+    max-width: 30ch;
+  }
+
+  .rodape-poster{
+    font-size:0.82rem;
+    opacity:0.75;
+    z-index:1;
+    border-top: 1px solid rgba(244,239,225,0.25);
+    padding-top:14px;
+    margin-top: 24px;
+  }
+
+  .ilustra-varal{
+    z-index:1;
+    display:flex;
+    gap:10px;
+    margin: 22px 0;
+  }
+  .cartao-mini{
+    background: var(--pergaminho);
+    color: var(--tinta);
+    border-radius:10px;
+    padding:10px 12px;
+    width: 90px;
+    font-size:0.72rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+    transform: rotate(-4deg);
+  }
+  .cartao-mini:nth-child(2){ transform: rotate(3deg); margin-top:14px; }
+  .cartao-mini:nth-child(3){ transform: rotate(-2deg); }
+  .cartao-mini .pt-avatar{
+    width:22px;height:22px;border-radius:50%;
+    background: var(--barro-claro);
+    margin-bottom:6px;
+  }
+
+  .lado-form{
+    padding: 44px 40px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .abas{
+    display:flex;
+    gap: 6px;
+    margin-bottom: 26px;
+    background: var(--pergaminho);
+    padding:4px;
+    border-radius: 999px;
+    border:1px solid var(--linha);
+  }
+  .aba-btn{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding:9px 12px;
+    border-radius:999px;
+    font-size:0.92rem;
+    font-weight:600;
+    color: var(--musgo-escuro);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .aba-btn.ativa{
+    background: var(--musgo);
+    color: var(--pergaminho);
+  }
+
+  .campo{
+    margin-bottom: 16px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .campo label{
+    font-size:0.8rem;
+    font-weight:600;
+    color: var(--musgo-escuro);
+  }
+  .campo input{
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1.5px solid var(--linha);
+    background: #fff;
+    font-size:0.96rem;
+    color: var(--tinta);
+  }
+  .campo input:focus{
+    border-color: var(--musgo);
+  }
+  .dica-campo{
+    font-size:0.74rem;
+    color:#6b6250;
+  }
+
+  .btn-primario{
+    background: var(--barro);
+    color:#fff8ef;
+    border:none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight:700;
+    font-size:0.98rem;
+    margin-top:6px;
+    transition: transform 0.12s ease, background 0.2s ease;
+  }
+  .btn-primario:hover{ background:#a05a29; }
+  .btn-primario:active{ transform: scale(0.98); }
+
+  .btn-secundario{
+    background:transparent;
+    border: 1.5px solid var(--musgo);
+    color: var(--musgo-escuro);
+    padding: 10px 16px;
+    border-radius:10px;
+    font-weight:600;
+  }
+  .btn-secundario:hover{ background: rgba(76,107,74,0.08); }
+
+  .msg-erro{
+    background: #fbeae7;
+    border: 1px solid var(--erro);
+    color: var(--erro);
+    padding: 9px 12px;
+    border-radius:8px;
+    font-size:0.86rem;
+    margin-bottom:14px;
+  }
+  .msg-sucesso{
+    background: #eaf3e6;
+    border: 1px solid var(--musgo);
+    color: var(--musgo-escuro);
+    padding: 9px 12px;
+    border-radius:8px;
+    font-size:0.86rem;
+    margin-bottom:14px;
+  }
+
+  .info-vagas{
+    margin-top:auto;
+    font-size:0.78rem;
+    color:#6b6250;
+    text-align:center;
+    padding-top: 14px;
+  }
+
+  /* ---------- APP PRINCIPAL ---------- */
+  .topo{
+    position: sticky; top:0; z-index:10;
+    background: var(--branco-cartao);
+    border-bottom: 1px solid var(--linha);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 12px 24px;
+  }
+  .topo .marca-app{
+    font-size:1.3rem;
+    font-weight:700;
+    color: var(--musgo-escuro);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .topo .marca-app .ponto{
+    width:9px;height:9px;border-radius:50%;
+    background: var(--barro);
+    display:inline-block;
+  }
+
+  .nav-usuario{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .nav-usuario .avatar-topo{
+    width:38px; height:38px; border-radius:50%;
+    object-fit:cover;
+    border: 2px solid var(--musgo);
+    cursor:pointer;
+    background: var(--barro-claro);
+  }
+  .link-nav{
+    background:none;border:none;
+    font-weight:600;
+    color: var(--musgo-escuro);
+    font-size:0.9rem;
+    padding: 6px 10px;
+    border-radius:8px;
+  }
+  .link-nav:hover{ background: rgba(76,107,74,0.09); }
+  .link-nav.sair{ color: var(--erro); }
+
+  .container-principal{
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 26px 18px 80px 18px;
+  }
+
+  .cartao-compor{
+    background: var(--branco-cartao);
+    border:1px solid var(--linha);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 22px;
+    box-shadow: var(--sombra);
+  }
+  .compor-topo{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .compor-topo img{
+    width:42px;height:42px;border-radius:50%;
+    object-fit:cover;
+    background: var(--barro-claro);
+    flex-shrink:0;
+  }
+  .compor-topo textarea{
+    flex:1;
+    resize:none;
+    border:1.5px solid var(--linha);
+    border-radius:12px;
+    padding:11px 13px;
+    font-family: var(--fonte-corpo);
+    font-size:0.95rem;
+    min-height:60px;
+    background:#fff;
+  }
+  .compor-topo textarea:focus{ border-color: var(--musgo); }
+  .compor-rodape{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+  }
+  .btn-anexo{
+    background: none;
+    border: 1.5px solid var(--linha);
+    color: var(--musgo-escuro);
+    font-weight:600;
+    font-size:0.85rem;
+    padding: 8px 13px;
+    border-radius:9px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-anexo:hover{ background: rgba(76,107,74,0.08); }
+  .preview-anexo{
+    position:relative;
+    display:inline-block;
+    margin-top:10px;
+  }
+  .preview-anexo img{
+    max-height: 160px;
+    max-width: 100%;
+    border-radius: 10px;
+    display:block;
+    border: 1px solid var(--linha);
+  }
+  .preview-anexo .remover-anexo{
+    position:absolute;
+    top:-8px; right:-8px;
+    width:24px; height:24px;
+    border-radius:50%;
+    background: var(--erro);
+    color:#fff;
+    border: 2px solid var(--branco-cartao);
+    font-size:0.8rem;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .post{
+    background: var(--branco-cartao);
+    border:1px solid var(--linha);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: var(--sombra);
+    animation: surgir 0.25s ease;
+  }
+  @keyframes surgir{
+    from{ opacity:0; transform: translateY(6px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .post-cabeca{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    margin-bottom:10px;
+  }
+  .post-cabeca img{
+    width:40px;height:40px;border-radius:50%;
+    object-fit:cover;
+    background: var(--barro-claro);
+  }
+  .post-autor{ font-weight:700; font-size:0.94rem; display:inline-flex; align-items:center; gap:5px; }
+  .selo-verificado{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:16px; height:16px;
+    font-size:11px;
+    line-height:1;
+  }
+  .selo-verificado.normal{ color: #3b82c4; }
+  .selo-verificado.criador{ color: var(--barro); }
+
+  .faixa-banido{
+    background:#fbeae7;
+    border:1px solid var(--erro);
+    color:var(--erro);
+    font-size:0.78rem;
+    font-weight:600;
+    padding:6px 10px;
+    border-radius:8px;
+    margin-bottom:10px;
+    display:inline-block;
+  }
+
+  .btn-acao.banir{ color: var(--erro); }
+  .btn-acao.banir:hover{ background:#fbeae7; }
+  .btn-acao.desbanir{ color: var(--musgo-escuro); }
+
+  .painel-admin{
+    background: var(--branco-cartao);
+    border: 1.5px solid var(--barro);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 22px;
+    box-shadow: var(--sombra);
+  }
+  .painel-admin h3{
+    margin-top:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .linha-usuario-admin{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px solid var(--linha);
+  }
+  .linha-usuario-admin:last-child{ border-bottom:none; }
+  .linha-usuario-admin img{
+    width:32px;height:32px;border-radius:50%;object-fit:cover;
+    background: var(--barro-claro);
+  }
+  .linha-usuario-admin .info-usuario-admin{ flex:1; min-width:0; }
+  .linha-usuario-admin .info-usuario-admin .nome-mini{ font-weight:600; font-size:0.88rem; }
+  .linha-usuario-admin .info-usuario-admin .email-mini{ font-size:0.74rem; color:#847a63; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .btn-mini-banir{
+    background: var(--erro);
+    color:#fff;
+    border:none;
+    padding:6px 11px;
+    border-radius:8px;
+    font-size:0.78rem;
+    font-weight:600;
+  }
+  .btn-mini-banir.desbanir{ background: var(--musgo); }
+  .post-data{ font-size:0.76rem; color:#847a63; }
+  .post-texto{
+    font-size:0.98rem;
+    line-height:1.5;
+    white-space:pre-wrap;
+    margin-bottom: 10px;
+  }
+  .post-imagem{
+    width:100%;
+    max-height: 480px;
+    object-fit:cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display:block;
+    border: 1px solid var(--linha);
+  }
+  .post-video{
+    width:100%;
+    max-height: 480px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display:block;
+    border: 1px solid var(--linha);
+    background:#000;
+  }
+  .post-acoes{
+    display:flex;
+    gap:16px;
+    align-items:center;
+    flex-wrap:wrap;
+    border-top:1px solid var(--linha);
+    padding-top:10px;
+  }
+  .btn-acao{
+    background:none;border:none;
+    display:flex; align-items:center; gap:6px;
+    font-size:0.85rem;
+    color:#6b6250;
+    font-weight:600;
+    padding:4px 8px;
+    border-radius:8px;
+  }
+  .btn-acao:hover{ background: rgba(76,107,74,0.08); color: var(--musgo-escuro); }
+  .btn-acao.curtido{ color: var(--barro); }
+  .btn-acao.excluir{ margin-left:auto; }
+  .btn-acao.excluir:hover{ color: var(--erro); background:#fbeae7; }
+
+  .bloco-comentarios{
+    margin-top: 12px;
+    border-top:1px solid var(--linha);
+    padding-top: 12px;
+  }
+  .lista-comentarios{ display:flex; flex-direction:column; gap:10px; margin-bottom:10px; }
+  .comentario{
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+  }
+  .comentario img{
+    width:28px; height:28px; border-radius:50%;
+    object-fit:cover; flex-shrink:0;
+    background: var(--barro-claro);
+    margin-top:2px;
+  }
+  .comentario-corpo{
+    background: var(--pergaminho);
+    border-radius: 12px;
+    padding: 7px 11px;
+    flex:1;
+    min-width:0;
+  }
+  .comentario-autor{
+    font-weight:700;
+    font-size:0.82rem;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .comentario-texto{
+    font-size:0.87rem;
+    line-height:1.4;
+    white-space:pre-wrap;
+    word-break: break-word;
+  }
+  .comentario-rodape{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-top:3px;
+  }
+  .comentario-data{ font-size:0.7rem; color:#8a8067; }
+  .comentario-excluir{
+    background:none; border:none;
+    font-size:0.7rem;
+    font-weight:600;
+    color: var(--erro);
+    padding:0;
+  }
+  .form-comentario{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .form-comentario img{
+    width:28px;height:28px;border-radius:50%;
+    object-fit:cover;
+    background: var(--barro-claro);
+    flex-shrink:0;
+  }
+  .form-comentario input{
+    flex:1;
+    border:1.5px solid var(--linha);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size:0.86rem;
+    font-family: var(--fonte-corpo);
+    background:#fff;
+  }
+  .form-comentario input:focus{ border-color: var(--musgo); }
+  .form-comentario button{
+    background: var(--musgo);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding: 8px 14px;
+    font-size:0.82rem;
+    font-weight:700;
+  }
+  .form-comentario button:hover{ background: var(--musgo-escuro); }
+  .sem-comentarios{ font-size:0.8rem; color:#8a8067; margin-bottom:8px; }
+
+  .vazio-feed{
+    text-align:center;
+    padding: 50px 20px;
+    color:#8a8067;
+  }
+  .vazio-feed .emoji-vazio{ font-size:2.2rem; margin-bottom:10px; }
+
+  /* ---------- PERFIL ---------- */
+  .cabecalho-perfil{
+    background: var(--branco-cartao);
+    border:1px solid var(--linha);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    text-align:center;
+    margin-bottom: 22px;
+    box-shadow: var(--sombra);
+  }
+  .avatar-grande-wrap{
+    position:relative;
+    width:104px; height:104px;
+    margin: 0 auto 14px auto;
+  }
+  .avatar-grande{
+    width:104px;height:104px;border-radius:50%;
+    object-fit:cover;
+    border: 3px solid var(--musgo);
+    background: var(--barro-claro);
+  }
+  .btn-trocar-foto{
+    position:absolute;
+    bottom:-2px; right:-2px;
+    background: var(--barro);
+    color:#fff;
+    border:none;
+    width:32px;height:32px;
+    border-radius:50%;
+    font-size:0.95rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  .nome-perfil{ font-size:1.3rem; margin: 4px 0 2px 0; }
+  .email-perfil{ font-size:0.85rem; color:#847a63; margin-bottom:14px; }
+  .bio-perfil{
+    font-size:0.92rem;
+    max-width: 46ch;
+    margin: 0 auto 16px auto;
+    color:#4a4232;
+    line-height:1.5;
+  }
+
+  .form-editar-perfil{
+    background: var(--branco-cartao);
+    border:1px solid var(--linha);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom:22px;
+    box-shadow: var(--sombra);
+  }
+  .form-editar-perfil h3{ margin-top:0; }
+  .linha-botoes-perfil{
+    display:flex; gap:10px; margin-top:6px;
+  }
+
+  input[type="file"]{ display:none; }
+
+  .rodape-conta{
+    text-align:center;
+    font-size:0.78rem;
+    color:#8a8067;
+    padding: 10px 0 30px 0;
+  }
+
+  /* ---------- RESPONSIVO ---------- */
+  @media (max-width: 760px){
+    .cartao-auth{ grid-template-columns: 1fr; max-width: 460px; }
+    .lado-poster{ padding: 34px 28px; }
+    .ilustra-varal{ display:none; }
+    .lado-form{ padding: 32px 24px; }
+    .topo{ padding: 10px 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== TELA DE AUTENTICAÇÃO ===================== -->
+  <div class="tela-auth" id="telaAuth">
+    <div class="cartao-auth">
+
+      <div class="lado-poster">
+        <div>
+          <p class="marca">🌿 Varanda</p>
+          <p class="slogan">Um cantinho simples pra postar o que quiser e ver o pessoal por perto.</p>
+        </div>
+
+        <div class="ilustra-varal" aria-hidden="true">
+          <div class="cartao-mini"><div class="pt-avatar"></div>bom dia, gente!</div>
+          <div class="cartao-mini"><div class="pt-avatar"></div>café coado ☕</div>
+          <div class="cartao-mini"><div class="pt-avatar"></div>terminei o projeto 🎉</div>
+        </div>
+
+        <div class="rodape-poster">
+          Seus dados ficam salvos só neste navegador, em formato JSON local — nada é enviado pra fora.
+        </div>
+      </div>
+
+      <div class="lado-form">
+        <div class="abas">
+          <button class="aba-btn ativa" id="abaEntrar" onclick="mostrarAba('entrar')">Entrar</button>
+          <button class="aba-btn" id="abaCadastrar" onclick="mostrarAba('cadastrar')">Criar conta</button>
+        </div>
+
+        <div id="areaMsgAuth"></div>
+
+        <!-- FORM LOGIN -->
+        <form id="formLogin" onsubmit="return fazerLogin(event)">
+          <div class="campo">
+            <label for="loginEmail">E-mail</label>
+            <input type="email" id="loginEmail" placeholder="voce@exemplo.com" required autocomplete="email">
+          </div>
+          <div class="campo">
+            <label for="loginSenha">Senha</label>
+            <input type="password" id="loginSenha" placeholder="Sua senha" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn-primario">Entrar na Varanda</button>
+        </form>
+
+        <!-- FORM CADASTRO -->
+        <form id="formCadastro" class="hidden" onsubmit="return fazerCadastro(event)">
+          <div class="campo">
+            <label for="cadNome">Nome</label>
+            <input type="text" id="cadNome" placeholder="Como quer ser chamado(a)" required maxlength="40">
+          </div>
+          <div class="campo">
+            <label for="cadEmail">E-mail</label>
+            <input type="email" id="cadEmail" placeholder="voce@exemplo.com" required autocomplete="email">
+          </div>
+          <div class="campo">
+            <label for="cadSenha">Senha</label>
+            <input type="password" id="cadSenha" placeholder="Mínimo 4 caracteres" required minlength="4" autocomplete="new-password">
+            <span class="dica-campo">A senha é criptografada antes de ser salva — nem nós vemos o texto original.</span>
+          </div>
+          <button type="submit" class="btn-primario">Criar minha conta</button>
+        </form>
+
+        <div class="info-vagas" id="infoVagas"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== APP PRINCIPAL ===================== -->
+  <div id="telaApp" class="hidden">
+
+    <div class="topo">
+      <div class="marca-app"><span class="ponto"></span> Varanda</div>
+      <div class="nav-usuario">
+        <button class="link-nav" onclick="irPara('feed')">Feed</button>
+        <button class="link-nav" onclick="irPara('perfil')">Meu perfil</button>
+        <img src="" alt="Seu avatar" class="avatar-topo" id="avatarTopo" onclick="irPara('perfil')">
+        <button class="link-nav sair" onclick="sair()">Sair</button>
+      </div>
+    </div>
+
+    <div class="container-principal">
+
+      <!-- FEED -->
+      <div id="viewFeed">
+        <div class="cartao-compor">
+          <div class="compor-topo">
+            <img src="" alt="" id="avatarCompor">
+            <textarea id="textoNovoPost" placeholder="O que está acontecendo na sua varanda hoje?" maxlength="500"></textarea>
+          </div>
+          <div id="previewFeed"></div>
+          <input type="file" id="inputImagemFeed" accept="image/*" onchange="selecionarMidia('feed', event, 'imagem')">
+          <input type="file" id="inputVideoFeed" accept="video/*" onchange="selecionarMidia('feed', event, 'video')">
+          <div class="compor-rodape">
+            <div style="display:flex; gap:8px;">
+              <button class="btn-anexo" onclick="document.getElementById('inputImagemFeed').click()">🖼️ Foto</button>
+              <button class="btn-anexo" onclick="document.getElementById('inputVideoFeed').click()">🎬 Vídeo</button>
+            </div>
+            <button class="btn-primario" onclick="publicarPost('feed')">Publicar</button>
+          </div>
+        </div>
+
+        <div id="listaPosts"></div>
+      </div>
+
+      <!-- PERFIL -->
+      <div id="viewPerfil" class="hidden">
+        <div id="painelAdmin"></div>
+
+        <div class="cabecalho-perfil">
+          <div class="avatar-grande-wrap">
+            <img src="" alt="Sua foto de perfil" class="avatar-grande" id="avatarGrande">
+            <button class="btn-trocar-foto" title="Trocar foto" onclick="document.getElementById('inputFoto').click()">✎</button>
+            <input type="file" id="inputFoto" accept="image/*" onchange="trocarFoto(event)">
+          </div>
+          <h2 class="nome-perfil" id="nomePerfilView"></h2>
+          <div class="email-perfil" id="emailPerfilView"></div>
+          <div class="bio-perfil" id="bioPerfilView"></div>
+          <button class="btn-secundario" onclick="alternarEdicaoPerfil()">Editar perfil</button>
+        </div>
+
+        <div class="form-editar-perfil hidden" id="formEditarPerfil">
+          <h3>Editar informações</h3>
+          <div class="campo">
+            <label for="editNome">Nome</label>
+            <input type="text" id="editNome" maxlength="40">
+          </div>
+          <div class="campo">
+            <label for="editBio">Bio</label>
+            <input type="text" id="editBio" maxlength="120" placeholder="Fale um pouco sobre você">
+          </div>
+          <div class="linha-botoes-perfil">
+            <button class="btn-primario" onclick="salvarPerfil()">Salvar alterações</button>
+            <button class="btn-secundario" onclick="alternarEdicaoPerfil()">Cancelar</button>
+          </div>
+        </div>
+
+        <div class="cartao-compor">
+          <div class="compor-topo">
+            <img src="" alt="" id="avatarComporPerfil">
+            <textarea id="textoNovoPostPerfil" placeholder="Postar direto do seu perfil..." maxlength="500"></textarea>
+          </div>
+          <div id="previewPerfil"></div>
+          <input type="file" id="inputImagemPerfil" accept="image/*" onchange="selecionarMidia('perfil', event, 'imagem')">
+          <input type="file" id="inputVideoPerfil" accept="video/*" onchange="selecionarMidia('perfil', event, 'video')">
+          <div class="compor-rodape">
+            <div style="display:flex; gap:8px;">
+              <button class="btn-anexo" onclick="document.getElementById('inputImagemPerfil').click()">🖼️ Foto</button>
+              <button class="btn-anexo" onclick="document.getElementById('inputVideoPerfil').click()">🎬 Vídeo</button>
+            </div>
+            <button class="btn-primario" onclick="publicarPost('perfil')">Publicar</button>
+          </div>
+        </div>
+
+        <h3 style="margin: 22px 4px 10px 4px;">Suas publicações</h3>
+        <div id="listaPostsPerfil"></div>
+      </div>
+
+    </div>
+
+    <div class="rodape-conta">Varanda — rede social local, feita com HTML, CSS e JavaScript puro.</div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================================
+   VARANDA — mini rede social local
+   Tudo é salvo em localStorage no formato JSON, simulando um "banco" simples.
+   Limite: 50 contas. Senha nunca é salva em texto puro (hash SHA-256 + salt).
+   ========================================================================= */
+
+const CHAVE_BANCO = 'varanda_banco_v1';
+const CHAVE_SESSAO = 'varanda_sessao_v1';
+const LIMITE_CONTAS = 100000;
+
+// E-mail do criador da Varanda: recebe o selo de criador e pode banir usuários.
+const EMAIL_ADMIN = 'davixxluizz@gmail.com';
+
+function ehAdmin(usuario){
+  return !!usuario && usuario.email.toLowerCase() === EMAIL_ADMIN;
+}
+
+/* ---------------------- "BANCO DE DADOS" JSON ---------------------- */
+function carregarBanco(){
+  const bruto = localStorage.getItem(CHAVE_BANCO);
+  if(!bruto){
+    const vazio = { usuarios: [], posts: [] };
+    localStorage.setItem(CHAVE_BANCO, JSON.stringify(vazio));
+    return vazio;
+  }
+  try{
+    return JSON.parse(bruto);
+  }catch(e){
+    const vazio = { usuarios: [], posts: [] };
+    localStorage.setItem(CHAVE_BANCO, JSON.stringify(vazio));
+    return vazio;
+  }
+}
+
+function salvarBanco(banco){
+  try{
+    localStorage.setItem(CHAVE_BANCO, JSON.stringify(banco));
+    return true;
+  }catch(e){
+    alert('Não foi possível salvar: o armazenamento local está cheio. Tente uma imagem menor ou apague posts antigos.');
+    return false;
+  }
+}
+
+/* ---------------------- CRIPTOGRAFIA DA SENHA ----------------------
+   Usamos SHA-256 (via SubtleCrypto do navegador) + salt aleatório por
+   usuário. A senha em texto puro nunca é armazenada.
+--------------------------------------------------------------------- */
+async function gerarHashSenha(senha, saltHex){
+  const codificador = new TextEncoder();
+  const dados = codificador.encode(senha + ':' + saltHex);
+  const bufferHash = await crypto.subtle.digest('SHA-256', dados);
+  return Array.from(new Uint8Array(bufferHash))
+    .map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function gerarSalt(){
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ---------------------- SESSÃO ATUAL ---------------------- */
+function obterSessao(){
+  const bruto = sessionStorage.getItem(CHAVE_SESSAO) || localStorage.getItem(CHAVE_SESSAO);
+  return bruto ? JSON.parse(bruto) : null;
+}
+function definirSessao(emailUsuario){
+  localStorage.setItem(CHAVE_SESSAO, JSON.stringify({ email: emailUsuario }));
+}
+function limparSessao(){
+  localStorage.removeItem(CHAVE_SESSAO);
+}
+
+/* ---------------------- HELPERS DE UI ---------------------- */
+function mostrarAba(aba){
+  document.getElementById('abaEntrar').classList.toggle('ativa', aba==='entrar');
+  document.getElementById('abaCadastrar').classList.toggle('ativa', aba==='cadastrar');
+  document.getElementById('formLogin').classList.toggle('hidden', aba!=='entrar');
+  document.getElementById('formCadastro').classList.toggle('hidden', aba!=='cadastrar');
+  document.getElementById('areaMsgAuth').innerHTML = '';
+}
+
+function exibirMsgAuth(texto, tipo){
+  const div = document.getElementById('areaMsgAuth');
+  div.innerHTML = `<div class="${tipo==='erro' ? 'msg-erro' : 'msg-sucesso'}">${escaparHtml(texto)}</div>`;
+}
+
+function escaparHtml(txt){
+  const d = document.createElement('div');
+  d.innerText = txt;
+  return d.innerHTML;
+}
+
+function atualizarInfoVagas(){
+  const banco = carregarBanco();
+  const restantes = LIMITE_CONTAS - banco.usuarios.length;
+  document.getElementById('infoVagas').innerText =
+    restantes > 0
+      ? `${banco.usuarios.length}/${LIMITE_CONTAS} contas criadas nesta Varanda.`
+      : `Limite de ${LIMITE_CONTAS} contas atingido nesta Varanda.`;
+}
+
+/* ---------------------- CADASTRO ---------------------- */
+async function fazerCadastro(ev){
+  ev.preventDefault();
+  const nome = document.getElementById('cadNome').value.trim();
+  const email = document.getElementById('cadEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('cadSenha').value;
+
+  const banco = carregarBanco();
+
+  if(banco.usuarios.length >= LIMITE_CONTAS){
+    exibirMsgAuth(`Esta Varanda já tem ${LIMITE_CONTAS} contas cadastradas. Não é possível criar mais.`, 'erro');
+    return false;
+  }
+
+  if(banco.usuarios.some(u => u.email === email)){
+    exibirMsgAuth('Já existe uma conta com esse e-mail.', 'erro');
+    return false;
+  }
+
+  const salt = gerarSalt();
+  const hash = await gerarHashSenha(senha, salt);
+
+  const novoUsuario = {
+    nome,
+    email,
+    senhaHash: hash,
+    salt,
+    bio: '',
+    foto: gerarAvatarPadrao(nome),
+    banido: false,
+    criadoEm: new Date().toISOString()
+  };
+
+  banco.usuarios.push(novoUsuario);
+  salvarBanco(banco);
+
+  document.getElementById('formCadastro').reset();
+  atualizarInfoVagas();
+
+  // Cadastro concluído: entra direto no app, sem precisar logar de novo.
+  definirSessao(novoUsuario.email);
+  entrarNoApp();
+  return false;
+}
+
+/* Gera um avatar simples em SVG (iniciais + cor) como imagem padrão */
+function gerarAvatarPadrao(nome){
+  const inicial = (nome.trim()[0] || '?').toUpperCase();
+  const cores = ['#4c6b4a','#b5652f','#7a8f5c','#9c5a2e','#5f7a4f'];
+  const cor = cores[inicial.charCodeAt(0) % cores.length];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+    <rect width="120" height="120" rx="60" fill="${cor}"/>
+    <text x="50%" y="54%" font-family="Georgia, serif" font-size="52" fill="#f4efe1" text-anchor="middle" dominant-baseline="middle">${inicial}</text>
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+}
+
+/* ---------------------- LOGIN ---------------------- */
+async function fazerLogin(ev){
+  ev.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('loginSenha').value;
+
+  const banco = carregarBanco();
+  const usuario = banco.usuarios.find(u => u.email === email);
+
+  if(!usuario){
+    exibirMsgAuth('Não encontramos uma conta com esse e-mail.', 'erro');
+    return false;
+  }
+
+  const hashTentativa = await gerarHashSenha(senha, usuario.salt);
+  if(hashTentativa !== usuario.senhaHash){
+    exibirMsgAuth('Senha incorreta.', 'erro');
+    return false;
+  }
+
+  if(usuario.banido){
+    exibirMsgAuth('Esta conta foi banida da Varanda e não pode mais entrar.', 'erro');
+    return false;
+  }
+
+  definirSessao(usuario.email);
+  entrarNoApp();
+  return false;
+}
+
+function sair(){
+  limparSessao();
+  document.getElementById('telaApp').classList.add('hidden');
+  document.getElementById('telaAuth').classList.remove('hidden');
+  document.getElementById('formLogin').reset();
+  mostrarAba('entrar');
+  atualizarInfoVagas();
+}
+
+/* ---------------------- NAVEGAÇÃO NO APP ---------------------- */
+function irPara(view){
+  document.getElementById('viewFeed').classList.toggle('hidden', view!=='feed');
+  document.getElementById('viewPerfil').classList.toggle('hidden', view!=='perfil');
+  if(view === 'perfil') renderizarPerfil();
+  if(view === 'feed') renderizarFeed();
+}
+
+function usuarioAtual(){
+  const sessao = obterSessao();
+  if(!sessao) return null;
+  const banco = carregarBanco();
+  return banco.usuarios.find(u => u.email === sessao.email) || null;
+}
+
+function entrarNoApp(){
+  const usuario = usuarioAtual();
+  if(!usuario){ sair(); return; }
+  if(usuario.banido){ sair(); return; }
+
+  document.getElementById('telaAuth').classList.add('hidden');
+  document.getElementById('telaApp').classList.remove('hidden');
+  document.getElementById('avatarTopo').src = usuario.foto;
+  document.getElementById('avatarCompor').src = usuario.foto;
+  document.getElementById('avatarComporPerfil').src = usuario.foto;
+
+  irPara('feed');
+}
+
+/* ---------------------- POSTS ---------------------- */
+
+// Guarda a mídia anexada (base64) de cada compositor, antes de publicar.
+// Formato: { tipo: 'imagem'|'video', dados: 'data:...' }
+const midiaAnexada = { feed: null, perfil: null };
+
+function idsDoCompositor(origem){
+  return origem === 'perfil'
+    ? { textarea: 'textoNovoPostPerfil', preview: 'previewPerfil', inputImagem: 'inputImagemPerfil', inputVideo: 'inputVideoPerfil' }
+    : { textarea: 'textoNovoPost', preview: 'previewFeed', inputImagem: 'inputImagemFeed', inputVideo: 'inputVideoFeed' };
+}
+
+function selecionarMidia(origem, ev, tipo){
+  const arquivo = ev.target.files[0];
+  if(!arquivo) return;
+
+  const prefixoEsperado = tipo === 'video' ? 'video/' : 'image/';
+  if(!arquivo.type.startsWith(prefixoEsperado)){
+    alert(tipo === 'video' ? 'Escolha um arquivo de vídeo.' : 'Escolha um arquivo de imagem.');
+    return;
+  }
+
+  const limite = tipo === 'video' ? 25 * 1024 * 1024 : 4 * 1024 * 1024;
+  if(arquivo.size > limite){
+    alert(`Escolha um arquivo menor que ${tipo === 'video' ? '25MB' : '4MB'}, por favor.`);
+    return;
+  }
+
+  const leitor = new FileReader();
+  leitor.onload = function(e){
+    midiaAnexada[origem] = { tipo, dados: e.target.result };
+    renderizarPreviewAnexo(origem);
+  };
+  leitor.readAsDataURL(arquivo);
+}
+
+function renderizarPreviewAnexo(origem){
+  const ids = idsDoCompositor(origem);
+  const alvo = document.getElementById(ids.preview);
+  const midia = midiaAnexada[origem];
+
+  if(!midia){ alvo.innerHTML = ''; return; }
+
+  const conteudo = midia.tipo === 'video'
+    ? `<video src="${midia.dados}" controls style="max-height:160px; max-width:100%; border-radius:10px; display:block; border:1px solid var(--linha);"></video>`
+    : `<img src="${midia.dados}" alt="Pré-visualização da imagem">`;
+
+  alvo.innerHTML = `<div class="preview-anexo">
+       ${conteudo}
+       <button type="button" class="remover-anexo" title="Remover mídia" onclick="removerMidiaAnexada('${origem}')">✕</button>
+     </div>`;
+}
+
+function removerMidiaAnexada(origem){
+  midiaAnexada[origem] = null;
+  const ids = idsDoCompositor(origem);
+  document.getElementById(ids.inputImagem).value = '';
+  document.getElementById(ids.inputVideo).value = '';
+  renderizarPreviewAnexo(origem);
+}
+
+function publicarPost(origem){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+
+  const ids = idsDoCompositor(origem);
+  const textarea = document.getElementById(ids.textarea);
+  const texto = textarea.value.trim();
+  const midia = midiaAnexada[origem];
+
+  // Precisa ter pelo menos texto ou mídia para publicar.
+  if(!texto && !midia) return;
+
+  const banco = carregarBanco();
+  banco.posts.unshift({
+    id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    autorEmail: usuario.email,
+    texto,
+    imagem: (midia && midia.tipo === 'imagem') ? midia.dados : null,
+    video: (midia && midia.tipo === 'video') ? midia.dados : null,
+    criadoEm: new Date().toISOString(),
+    curtidas: [],
+    comentarios: []
+  });
+  const salvou = salvarBanco(banco);
+  if(!salvou) return;
+
+  // Limpa o compositor usado.
+  textarea.value = '';
+  removerMidiaAnexada(origem);
+
+  renderizarFeed();
+  renderizarPerfil();
+}
+
+function excluirPost(id){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+  const banco = carregarBanco();
+  const post = banco.posts.find(p => p.id === id);
+  if(!post) return;
+
+  // Dono do post ou admin podem excluir.
+  if(post.autorEmail !== usuario.email && !ehAdmin(usuario)) return;
+
+  banco.posts = banco.posts.filter(p => p.id !== id);
+  salvarBanco(banco);
+  renderizarFeed();
+  renderizarPerfil();
+}
+
+/* ---------------------- COMENTÁRIOS ---------------------- */
+function comentarPost(postId, origemInputId){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+
+  const input = document.getElementById(origemInputId);
+  const texto = input.value.trim();
+  if(!texto) return;
+
+  const banco = carregarBanco();
+  const post = banco.posts.find(p => p.id === postId);
+  if(!post) return;
+
+  if(!Array.isArray(post.comentarios)) post.comentarios = [];
+
+  post.comentarios.push({
+    id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    autorEmail: usuario.email,
+    texto,
+    criadoEm: new Date().toISOString()
+  });
+
+  const salvou = salvarBanco(banco);
+  if(!salvou) return;
+
+  input.value = '';
+  renderizarFeed();
+  renderizarPerfil();
+}
+
+function excluirComentario(postId, comentarioId){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+
+  const banco = carregarBanco();
+  const post = banco.posts.find(p => p.id === postId);
+  if(!post || !Array.isArray(post.comentarios)) return;
+
+  const comentario = post.comentarios.find(c => c.id === comentarioId);
+  if(!comentario) return;
+
+  // Autor do comentário, dono do post ou admin podem excluir o comentário.
+  const podeExcluir = comentario.autorEmail === usuario.email
+    || post.autorEmail === usuario.email
+    || ehAdmin(usuario);
+  if(!podeExcluir) return;
+
+  post.comentarios = post.comentarios.filter(c => c.id !== comentarioId);
+  salvarBanco(banco);
+  renderizarFeed();
+  renderizarPerfil();
+}
+
+function alternarCurtida(id){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+  const banco = carregarBanco();
+  const post = banco.posts.find(p => p.id === id);
+  if(!post) return;
+
+  const idx = post.curtidas.indexOf(usuario.email);
+  if(idx === -1) post.curtidas.push(usuario.email);
+  else post.curtidas.splice(idx, 1);
+
+  salvarBanco(banco);
+  renderizarFeed();
+  renderizarPerfil();
+}
+
+function formatarData(iso){
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+function construirCartaoComentario(comentario, banco, usuarioLogado, post){
+  const autorComentario = banco.usuarios.find(u => u.email === comentario.autorEmail);
+  const autorEhAdmin = ehAdmin(autorComentario);
+  const podeExcluir = comentario.autorEmail === usuarioLogado.email
+    || post.autorEmail === usuarioLogado.email
+    || ehAdmin(usuarioLogado);
+
+  return `
+    <div class="comentario">
+      <img src="${autorComentario ? autorComentario.foto : ''}" alt="">
+      <div class="comentario-corpo">
+        <div class="comentario-autor">${escaparHtml(autorComentario ? autorComentario.nome : 'Usuário removido')}${autorEhAdmin ? '<span class="selo-verificado criador" title="Verificado de Criador">👑</span>' : ''}</div>
+        <div class="comentario-texto">${escaparHtml(comentario.texto)}</div>
+        <div class="comentario-rodape">
+          <span class="comentario-data">${formatarData(comentario.criadoEm)}</span>
+          ${podeExcluir ? `<button class="comentario-excluir" onclick="excluirComentario('${post.id}','${comentario.id}')">Excluir</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function construirCartaoPost(post, autor, usuarioLogado, banco){
+  const curtidoPorMim = post.curtidas.includes(usuarioLogado.email);
+  const souAutor = post.autorEmail === usuarioLogado.email;
+  const autorEhAdmin = ehAdmin(autor);
+  const podeAdminModerar = ehAdmin(usuarioLogado) && !souAutor;
+  const comentarios = Array.isArray(post.comentarios) ? post.comentarios : [];
+  const inputComentarioId = 'comentarioInput_' + post.id;
+
+  const htmlMidia = post.video
+    ? `<video src="${post.video}" class="post-video" controls playsinline></video>`
+    : (post.imagem ? `<img src="${post.imagem}" class="post-imagem" alt="Imagem publicada por ${escaparHtml(autor ? autor.nome : 'usuário')}">` : '');
+
+  const htmlComentarios = comentarios.length
+    ? comentarios.map(c => construirCartaoComentario(c, banco, usuarioLogado, post)).join('')
+    : `<div class="sem-comentarios">Nenhum comentário ainda. Seja o primeiro a comentar!</div>`;
+
+  return `
+    <div class="post" data-id="${post.id}">
+      <div class="post-cabeca">
+        <img src="${autor ? autor.foto : ''}" alt="">
+        <div>
+          <div class="post-autor">${escaparHtml(autor ? autor.nome : 'Usuário removido')}${autorEhAdmin ? '<span class="selo-verificado criador" title="Verificado de Criador">👑</span>' : ''}</div>
+          <div class="post-data">${formatarData(post.criadoEm)}</div>
+        </div>
+      </div>
+      ${htmlMidia}
+      ${post.texto ? `<div class="post-texto">${escaparHtml(post.texto)}</div>` : ''}
+      <div class="post-acoes">
+        <button class="btn-acao ${curtidoPorMim ? 'curtido' : ''}" onclick="alternarCurtida('${post.id}')">
+          ${curtidoPorMim ? '♥' : '♡'} Curtir ${post.curtidas.length > 0 ? '· ' + post.curtidas.length : ''}
+        </button>
+        <button class="btn-acao" onclick="document.getElementById('${inputComentarioId}').focus()">
+          💬 Comentar ${comentarios.length > 0 ? '· ' + comentarios.length : ''}
+        </button>
+        ${souAutor ? `<button class="btn-acao excluir" onclick="excluirPost('${post.id}')">🗑 Excluir</button>` : ''}
+        ${podeAdminModerar ? `<button class="btn-acao excluir" onclick="excluirPost('${post.id}')">🗑 Remover (admin)</button>` : ''}
+      </div>
+      <div class="bloco-comentarios">
+        <div class="lista-comentarios">${htmlComentarios}</div>
+        <div class="form-comentario">
+          <img src="${usuarioLogado.foto}" alt="">
+          <input type="text" id="${inputComentarioId}" placeholder="Escreva um comentário..." maxlength="300"
+                 onkeydown="if(event.key==='Enter'){ comentarPost('${post.id}','${inputComentarioId}'); }">
+          <button type="button" onclick="comentarPost('${post.id}','${inputComentarioId}')">Enviar</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderizarFeed(){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+  const banco = carregarBanco();
+
+  const alvo = document.getElementById('listaPosts');
+
+  if(banco.posts.length === 0){
+    alvo.innerHTML = `<div class="vazio-feed"><div class="emoji-vazio">🌱</div>Ninguém postou nada ainda.<br>Que tal escrever a primeira coisa?</div>`;
+    return;
+  }
+
+  alvo.innerHTML = banco.posts.map(post => {
+    const autor = banco.usuarios.find(u => u.email === post.autorEmail);
+    return construirCartaoPost(post, autor, usuario, banco);
+  }).join('');
+}
+
+/* ---------------------- PERFIL ---------------------- */
+function renderizarPerfil(){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+  const banco = carregarBanco();
+
+  document.getElementById('avatarGrande').src = usuario.foto;
+  document.getElementById('avatarComporPerfil').src = usuario.foto;
+  document.getElementById('nomePerfilView').innerText = usuario.nome;
+  document.getElementById('emailPerfilView').innerText = usuario.email;
+  document.getElementById('bioPerfilView').innerText = usuario.bio || 'Ainda sem bio — que tal escrever uma?';
+
+  document.getElementById('editNome').value = usuario.nome;
+  document.getElementById('editBio').value = usuario.bio || '';
+
+  const meusPosts = banco.posts.filter(p => p.autorEmail === usuario.email);
+  const alvo = document.getElementById('listaPostsPerfil');
+
+  if(meusPosts.length === 0){
+    alvo.innerHTML = `<div class="vazio-feed"><div class="emoji-vazio">📝</div>Você ainda não publicou nada.</div>`;
+    return;
+  }
+
+  alvo.innerHTML = meusPosts.map(post => construirCartaoPost(post, usuario, usuario, banco)).join('');
+}
+
+function alternarEdicaoPerfil(){
+  document.getElementById('formEditarPerfil').classList.toggle('hidden');
+}
+
+function salvarPerfil(){
+  const usuario = usuarioAtual();
+  if(!usuario) return;
+
+  const novoNome = document.getElementById('editNome').value.trim();
+  const novaBio = document.getElementById('editBio').value.trim();
+
+  if(!novoNome){ return; }
+
+  const banco = carregarBanco();
+  const alvo = banco.usuarios.find(u => u.email === usuario.email);
+  alvo.nome = novoNome;
+  alvo.bio = novaBio;
+  salvarBanco(banco);
+
+  document.getElementById('formEditarPerfil').classList.add('hidden');
+  renderizarPerfil();
+  document.getElementById('avatarTopo').src = alvo.foto;
+}
+
+function trocarFoto(ev){
+  const arquivo = ev.target.files[0];
+  if(!arquivo) return;
+
+  if(arquivo.size > 1.5 * 1024 * 1024){
+    alert('Escolha uma imagem menor que 1.5MB, por favor.');
+    return;
+  }
+
+  const leitor = new FileReader();
+  leitor.onload = function(e){
+    const usuario = usuarioAtual();
+    const banco = carregarBanco();
+    const alvo = banco.usuarios.find(u => u.email === usuario.email);
+    alvo.foto = e.target.result;
+    salvarBanco(banco);
+
+    document.getElementById('avatarGrande').src = alvo.foto;
+    document.getElementById('avatarTopo').src = alvo.foto;
+    document.getElementById('avatarCompor').src = alvo.foto;
+    document.getElementById('avatarComporPerfil').src = alvo.foto;
+  };
+  leitor.readAsDataURL(arquivo);
+}
+
+/* ---------------------- INICIALIZAÇÃO ---------------------- */
+(function iniciar(){
+  atualizarInfoVagas();
+  const sessao = obterSessao();
+  if(sessao && usuarioAtual()){
+    entrarNoApp();
+  }
+})();
+</script>
+
+</body>
+</html>
